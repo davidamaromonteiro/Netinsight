@@ -1,0 +1,122 @@
+# ═══════════════════════════════════════════════════════════════════════
+# NetInsight — Plateforme d'analyse de sécurité réseau
+# Déploiement complet : API, Workers, Frontend, + ACME Store (test SQLi)
+# Usage : docker compose up -d
+# ═══════════════════════════════════════════════════════════════════════
+
+services:
+  # ── Base de données MongoDB ──────────────────────────────────
+  mongodb:
+    image: mongo:7
+    container_name: netinsight-mongodb
+    restart: unless-stopped
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Broker Redis (Celery) ────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: netinsight-redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Backend API (FastAPI) ────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: netinsight-backend
+    restart: unless-stopped
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file: ./backend/.env
+    ports:
+      - "8000:8000"
+    volumes:
+      - reports_data:/tmp/netinsight/reports
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    healthcheck:
+      test: python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  # ── Celery Worker (tâches async : Nmap, SQLmap, Nikto, Rapports) ──
+  celery-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: netinsight-celery-worker
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    env_file: ./backend/.env
+    volumes:
+      - reports_data:/tmp/netinsight/reports
+    command: celery -A app.tasks worker --loglevel=warning --concurrency=2
+
+  # ── Frontend (Nginx + Svelte build) ─────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: netinsight-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:80/"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  # ── ACME Store (cible vulnérable pour SQLmap) ────────────────
+  acme-mysql:
+    image: mysql:8.0
+    container_name: acme-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: acme
+      MYSQL_USER: acme_app
+      MYSQL_PASSWORD: "AcmeDB#P@ss!2024"
+    volumes:
+      - ./acme-store/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - acme_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  acme-store:
+    build:
+      context: ./acme-store
+      dockerfile: Dockerfile
+    container_name: acme-store
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    depends_on:
+      acme-mysql:
+        condition: service_healthy
+
+volumes:
+  mongodb_data:
+  reports_data:
+  acme_mysql_data:

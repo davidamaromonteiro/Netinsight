@@ -1,0 +1,67 @@
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP", "B", "C4", "SIM"]
+ignore = ["E501", "B008", "UP045", "UP017", "UP042"]  # E501 line too long; B008 FastAPI Depends(); UP045/UP017/UP042 Python 3.9 compat (keep Optional, timezone.utc, str+Enum)
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.mypy]
+python_version = "3.12"
+strict = false
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+exclude = ["tests/"]
+
+[[tool.mypy.overrides]]
+module = [
+    "beanie",
+    "beanie.*",
+    "motor",
+    "motor.*",
+    "pymongo.*",
+    "celery",
+    "celery.*",
+    "nmap",
+    "nmap.*",
+    "reportlab",
+    "reportlab.*",
+    "slowapi",
+    "slowapi.*",
+    "passlib",
+    "passlib.*",
+    "jose",
+    "jose.*",
+    "python_jose.*",
+    "dateutil",
+    "dateutil.*",
+]
+ignore_missing_imports = true
+disable_error_code = ["import-untyped"]
+
+# Beanie models use Indexed(...) as a descriptor (not a type annotation),
+# and Beanie's sort() uses +/- unary operators on fields (e.g. sort(-Field)),
+# both of which mypy cannot type-check. We disable valid-type for models.
+[[tool.mypy.overrides]]
+module = ["app.models.user", "app.models.campaign", "app.models.host", "app.models.port", "app.models.service", "app.models.banner", "app.models.vulnerability", "app.models.mitre", "app.models.auth_test", "app.models.report", "app.models.config"]
+disable_error_code = ["valid-type"]
+
+# Beanie .sort(+Field) / .sort(-Field) unary operator pattern
+[[tool.mypy.overrides]]
+module = ["app.api.v1.campaigns", "app.api.v1.hosts", "app.api.v1.vulnerabilities", "app.api.v1.dashboard"]
+disable_error_code = ["operator", "arg-type"]
+
+# slowapi rate-limit handler type mismatch (known library quirk)
+[[tool.mypy.overrides]]
+module = ["app.main"]
+disable_error_code = ["arg-type"]
+
+# Beanie init_beanie database arg type mismatch
+[[tool.mypy.overrides]]
+module = ["app.core.db"]
+disable_error_code = ["arg-type"]
