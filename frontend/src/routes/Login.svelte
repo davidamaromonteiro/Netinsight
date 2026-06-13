@@ -1,5 +1,6 @@
 <script>
   import { auth } from '../lib/stores/auth';
+  import Logo from '../lib/components/Logo.svelte';
 
   let email = $state('');
   let password = $state('');
@@ -19,12 +20,8 @@
 <div class="min-h-screen flex items-center justify-center p-4" style="background: radial-gradient(ellipse at top, #0f172a 0%, #0a0e17 60%, #060a10 100%);">
   <div class="w-full max-w-md animate-fade-in">
     <!-- Logo -->
-    <div class="text-center mb-10">
-      <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4" style="background: linear-gradient(135deg, #06b6d4, #3b82f6); box-shadow: 0 0 40px rgba(6,182,212,0.3);">
-        <span class="text-2xl font-bold text-white">N</span>
-      </div>
-      <h1 class="text-3xl font-bold text-gradient">NetInsight</h1>
-      <p class="text-slate-500 mt-2 text-sm">Plateforme d'analyse de sécurité réseau</p>
+    <div class="mb-10">
+      <Logo mode="hero" />
     </div>
 
     <!-- Card -->
@@ -56,6 +53,6 @@
       </form>
     </div>
 
-    <p class="text-center text-xs text-slate-600 mt-6">NetInsight v0.2.0 — Sécurité réseau</p>
+    <p class="text-center text-[10px] text-slate-700 mt-6 font-mono tracking-wider">NetInsight v0.3.0 — Sécurité réseau</p>
   </div>
 </div>

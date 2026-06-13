@@ -1,6 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import { auth } from './lib/stores/auth';
+  import Logo from './lib/components/Logo.svelte';
   import Login from './routes/Login.svelte';
   import Dashboard from './routes/Dashboard.svelte';
   import Campaigns from './routes/Campaigns.svelte';
@@ -40,16 +41,8 @@
 {#if isAuth}
   <div class="flex h-screen overflow-hidden">
     <aside class="w-64 flex flex-col border-r border-slate-800/50" style="background: linear-gradient(180deg, #0f172a 0%, #0a0f1e 100%);">
-      <div class="p-5 border-b border-slate-800/30">
-        <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background: linear-gradient(135deg, #06b6d4, #3b82f6);">
-            <span class="text-white font-bold text-sm">N</span>
-          </div>
-          <div>
-            <h1 class="text-lg font-bold text-gradient">NetInsight</h1>
-            <p class="text-[10px] text-slate-500 tracking-wider uppercase">v0.2.0</p>
-          </div>
-        </div>
+      <div class="p-4 border-b border-slate-800/30">
+        <Logo mode="full" size="md" />
       </div>
 
       <nav class="flex-1 p-3 space-y-1 overflow-y-auto">
