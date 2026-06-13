@@ -218,7 +218,7 @@
     <select
       bind:value={statusFilter}
       onchange={handleFilterChange}
-      class="bg-slate-900/80 border border-slate-700/50 rounded-xl text-white placeholder-slate-600 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/30 transition-all text-sm px-3 py-2"
+      class="select-cyber"
     >
       <option value="">Tous les statuts</option>
       <option value="pending">En attente</option>
@@ -686,7 +686,7 @@
               bind:value={newScan.name}
               required
               placeholder="Ex: Test injection login"
-              class="w-full bg-slate-900/80 border border-slate-700/50 rounded-xl text-white placeholder-slate-600 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/30 transition-all text-sm px-3 py-2"
+              class="input-cyber"
             />
           </div>
 
@@ -697,7 +697,7 @@
               bind:value={newScan.description}
               rows="2"
               placeholder="Description du scan…"
-              class="w-full bg-slate-900/80 border border-slate-700/50 rounded-xl text-white placeholder-slate-600 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/30 transition-all text-sm px-3 py-2 resize-none"
+              class="input-cyber resize-none"
             ></textarea>
           </div>
 
@@ -711,7 +711,7 @@
               bind:value={newScan.target_url}
               required
               placeholder="http://acme-store/product.php?id=1"
-              class="w-full bg-slate-900/80 border border-slate-700/50 rounded-xl text-white placeholder-slate-600 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/30 transition-all text-sm px-3 py-2 font-mono"
+              class="input-cyber font-mono"
             />
             <div class="flex gap-2 mt-1.5">
               <button type="button" onclick={() => newScan.target_url = 'http://acme-store/product.php?id=1'} class="text-[10px] px-2 py-0.5 bg-purple-500/10 text-purple-400 rounded hover:bg-purple-500/20 transition-colors">Product (GET)</button>
@@ -729,7 +729,7 @@
               type="text"
               bind:value={newScan.sqlmap_args}
               placeholder="--batch --level 3 --risk 2 --dbs"
-              class="w-full bg-slate-900/80 border border-slate-700/50 rounded-xl text-white placeholder-slate-600 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/30 transition-all text-sm px-3 py-2 font-mono"
+              class="input-cyber font-mono"
             />
             <div class="flex gap-2 mt-1.5 flex-wrap">
               <button type="button" onclick={() => newScan.sqlmap_args = '--batch --level 2 --risk 1'} class="text-[10px] px-2 py-0.5 bg-slate-800 text-slate-400 rounded hover:bg-slate-700 transition-colors">Rapide</button>

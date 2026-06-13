@@ -52,12 +52,12 @@
       MEDIUM: 'bg-yellow-900/50 text-yellow-400 border-yellow-800',
       LOW: 'bg-blue-900/50 text-blue-400 border-blue-800',
     };
-    return map[severity] || 'bg-gray-700/50 text-gray-400 border-gray-600';
+    return map[severity] || 'badge-none';
   }
 
   function cvssColor(score) {
     const s = parseFloat(score);
-    if (isNaN(s)) return 'text-gray-400';
+    if (isNaN(s)) return 'text-slate-400';
     if (s >= 9.0) return 'text-red-400';
     if (s >= 7.0) return 'text-orange-400';
     if (s >= 4.0) return 'text-yellow-400';
@@ -93,7 +93,7 @@
     <select
       bind:value={hostFilter}
       onchange={handleFilterChange}
-      class="bg-slate-900/80 border border-slate-700/50 rounded-xl text-white placeholder-slate-600 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/30 transition-all text-sm px-3 py-2"
+      class="select-cyber"
     >
       <option value="">Tous les hôtes</option>
       {#each hosts as host (host.id)}
@@ -104,7 +104,7 @@
     <select
       bind:value={severityFilter}
       onchange={handleFilterChange}
-      class="bg-slate-900/80 border border-slate-700/50 rounded-xl text-white placeholder-slate-600 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/30 transition-all text-sm px-3 py-2"
+      class="select-cyber"
     >
       <option value="">Toutes les sévérités</option>
       <option value="CRITICAL">Critique</option>
@@ -123,75 +123,50 @@
   {:else if sortedVulns.length === 0}
     <div class="glass rounded-xl p-12 text-center">
       {#if hostFilter || severityFilter}
-        <p class="text-gray-500 text-lg">Aucune vulnérabilité ne correspond aux filtres.</p>
-        <button
-          onclick={() => { hostFilter = ''; severityFilter = ''; fetchAll(); }}
-          class="mt-4 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium rounded-lg transition-colors"
-        >
+        <p class="text-slate-500 text-lg">Aucune vulnérabilité ne correspond aux filtres.</p>
+        <button onclick={() => { hostFilter = ''; severityFilter = ''; fetchAll(); }}
+          class="btn-cyber text-sm mt-4 inline-block">
           Réinitialiser les filtres
         </button>
       {:else}
-        <p class="text-gray-500 text-lg">Aucune vulnérabilité détectée.</p>
+        <p class="text-slate-500 text-lg">Aucune vulnérabilité détectée.</p>
       {/if}
     </div>
   {:else}
-    <!-- Vulns table -->
     <div class="glass rounded-xl overflow-hidden">
-      <table class="w-full">
+      <table class="table-cyber">
         <thead>
-          <tr class="border-b border-gray-800 text-left">
-            <th class="px-4 py-3 text-[11px] text-slate-500 uppercase tracking-wider">CVE ID</th>
-            <th class="px-4 py-3 text-[11px] text-slate-500 uppercase tracking-wider">Sévérité</th>
-            <th class="px-4 py-3 text-[11px] text-slate-500 uppercase tracking-wider">CVSS</th>
-            <th class="px-4 py-3 text-[11px] text-slate-500 uppercase tracking-wider">Hôte</th>
-            <th class="px-4 py-3 text-[11px] text-slate-500 uppercase tracking-wider">Description</th>
-            <th class="px-4 py-3 text-[11px] text-slate-500 uppercase tracking-wider w-8"></th>
+          <tr>
+            <th>CVE ID</th>
+            <th>Sévérité</th>
+            <th>CVSS</th>
+            <th>Hôte</th>
+            <th>Description</th>
+            <th class="w-8"></th>
           </tr>
         </thead>
         <tbody>
           {#each sortedVulns as vuln (vuln.id)}
-            <tr
-              class="border-b border-gray-800/50 hover:bg-slate-800/30 cursor-pointer transition-colors"
-              onclick={() => toggleExpand(vuln.cve_id || vuln.id)}
-            >
-              <td class="px-4 py-3 font-mono text-sm text-cyan-400">{vuln.cve_id || vuln.id}</td>
-              <td class="px-4 py-3">
-                <span class="px-2 py-0.5 rounded text-xs font-medium border {severityClass(vuln.severity)}">
-                  {vuln.severity || 'NONE'}
-                </span>
-              </td>
-              <td class="px-4 py-3 font-mono text-sm font-medium {cvssColor(vuln.cvss_score)}">
-                {formatCvss(vuln.cvss_score)}
-              </td>
-              <td class="px-4 py-3 text-sm text-gray-400 font-mono">
-                {getHostIp(vuln.host_id)}
-              </td>
-              <td class="px-4 py-3 text-sm text-gray-400 max-w-md">
-                {truncate(vuln.description)}
-              </td>
-              <td class="px-4 py-3 text-right text-gray-500 text-xs">
-                {expandedVuln === (vuln.cve_id || vuln.id) ? '▲' : '▼'}
-              </td>
+            <tr class="border-b border-slate-800/50 hover:bg-slate-800/30 cursor-pointer transition-colors"
+              onclick={() => toggleExpand(vuln.cve_id || vuln.id)}>
+              <td class="font-mono text-sm text-cyan-400">{vuln.cve_id || vuln.id}</td>
+              <td><span class="badge {severityClass(vuln.severity)}">{vuln.severity || 'NONE'}</span></td>
+              <td class="font-mono text-sm font-medium {cvssColor(vuln.cvss_score)}">{formatCvss(vuln.cvss_score)}</td>
+              <td class="text-sm text-slate-400 font-mono">{getHostIp(vuln.host_id)}</td>
+              <td class="text-sm text-slate-400 max-w-md">{truncate(vuln.description)}</td>
+              <td class="text-right text-slate-500 text-xs">{expandedVuln === (vuln.cve_id || vuln.id) ? '▲' : '▼'}</td>
             </tr>
             {#if expandedVuln === (vuln.cve_id || vuln.id)}
-              <tr class="border-b border-gray-800/50 bg-slate-800/30">
+              <tr class="border-b border-slate-800/50 bg-slate-800/30">
                 <td colspan="6" class="px-6 py-4">
-                  <p class="text-sm text-gray-300 whitespace-pre-wrap">{vuln.description || '—'}</p>
+                  <p class="text-sm text-slate-300 whitespace-pre-wrap">{vuln.description || '—'}</p>
                   {#if vuln.references && Array.isArray(vuln.references) && vuln.references.length > 0}
                     <div class="mt-3">
-                      <p class="text-xs text-gray-500 mb-1">Références :</p>
+                      <p class="text-xs text-slate-500 mb-1 uppercase tracking-wider">Références</p>
                       <ul class="space-y-1">
                         {#each vuln.references as ref}
-                          <li>
-                            <a
-                              href={ref}
-                              target="_blank"
-                              rel="noopener"
-                              class="text-xs text-cyan-400 hover:text-cyan-300 underline break-all"
-                            >
-                              {ref}
-                            </a>
-                          </li>
+                          <li><a href={ref} target="_blank" rel="noopener"
+                            class="text-xs text-cyan-400 hover:text-cyan-300 underline break-all">{ref}</a></li>
                         {/each}
                       </ul>
                     </div>
@@ -205,7 +180,7 @@
     </div>
 
     <!-- Count -->
-    <p class="text-xs text-gray-600 mt-3">
+    <p class="text-xs text-slate-600 mt-3">
       {sortedVulns.length} vulnérabilité{sortedVulns.length !== 1 ? 's' : ''}
       {#if hostFilter || severityFilter} (filtrée{sortedVulns.length !== 1 ? 's' : ''}){/if}
       — triées par score CVSS décroissant
