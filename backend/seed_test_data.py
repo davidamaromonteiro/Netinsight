@@ -18,6 +18,7 @@ from app.core.db import DOCUMENT_MODELS
 from app.models.campaign import Campaign, CampaignStatus
 from app.models.host import Host
 from app.models.port import Port
+from app.models.user import User
 from app.models.vulnerability import Vulnerability
 from app.models.mitre import MitreTechnique
 from app.models.auth_test import AuthTest, AuthTestResult
@@ -32,6 +33,21 @@ async def seed():
     await init_beanie(database=db, document_models=DOCUMENT_MODELS)
 
     now = datetime.now(timezone.utc)
+
+    # ── Create default admin user ────────────────────────────
+    from app.core.security import hash_password
+    existing = await User.find_one(User.email == "admin@netinsight.io")
+    if not existing:
+        admin = User(
+            email="admin@netinsight.io",
+            hashed_password=hash_password("Admin123!"),
+            full_name="Admin NetInsight",
+            role="admin",
+        )
+        await admin.insert()
+        print(f"  Admin user created: admin@netinsight.io")
+    else:
+        print(f"  Admin user already exists")
 
     # ── Campaign 1: Scan réseau interne ──────────────────────────
     c1 = Campaign(
